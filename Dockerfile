@@ -1,28 +1,27 @@
-FROM hseeberger/scala-sbt
+## See https://github.com/docker-library/docker/blob/master/1.11/Dockerfile
+FROM docker:1.11
+
+## Add scala + sbt
 ## https://github.com/hseeberger/scala-sbt
 
-## Add docker capabilities
-## See https://github.com/docker-library/docker/blob/master/1.11/Dockerfile
+ENV SCALA_VERSION 2.11.7
+ENV SBT_VERSION 0.13.11
 
-RUN apk add --no-cache \
-		ca-certificates \
-		curl \
-		openssl
+# Install Scala
+## Piping curl directly in tar
+RUN \
+  curl -fsL http://downloads.typesafe.com/scala/$SCALA_VERSION/scala-$SCALA_VERSION.tgz | tar xfz - -C /root/ && \
+  echo >> /root/.bashrc && \
+  echo 'export PATH=~/scala-$SCALA_VERSION/bin:$PATH' >> /root/.bashrc
 
-ENV DOCKER_BUCKET get.docker.com
-ENV DOCKER_VERSION 1.11.2
-ENV DOCKER_SHA256 8c2e0c35e3cda11706f54b2d46c2521a6e9026a7b13c7d4b8ae1f3a706fc55e1
+# Install sbt
+RUN \
+  curl -L -o sbt-$SBT_VERSION.deb http://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
+  dpkg -i sbt-$SBT_VERSION.deb && \
+  rm sbt-$SBT_VERSION.deb && \
+  apt-get update && \
+  apt-get install sbt && \
+  sbt sbtVersion
 
-RUN set -x \
-	&& curl -fSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION.tgz" -o docker.tgz \
-	&& echo "${DOCKER_SHA256} *docker.tgz" | sha256sum -c - \
-	&& tar -xzvf docker.tgz \
-	&& mv docker/* /usr/local/bin/ \
-	&& rmdir docker \
-	&& rm docker.tgz \
-	&& docker -v
-
-COPY docker-entrypoint.sh /usr/local/bin/
-
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["sh"]
+# Define working directory
+WORKDIR /root
