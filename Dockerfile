@@ -15,13 +15,12 @@ RUN \
   echo 'export PATH=~/scala-$SCALA_VERSION/bin:$PATH' >> /root/.bashrc
 
 # Install sbt
-RUN \
-  curl -L -o sbt-$SBT_VERSION.deb http://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
-  dpkg -i sbt-$SBT_VERSION.deb && \
-  rm sbt-$SBT_VERSION.deb && \
-  apt-get update && \
-  apt-get install sbt && \
-  sbt sbtVersion
+RUN curl -L -o sbt-$SBT_VERSION.deb http://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb
+RUN  dpkg -i sbt-$SBT_VERSION.deb
+RUN  rm sbt-$SBT_VERSION.deb
+RUN  apt-get update
+RUN  apt-get install sbt
+RUN  sbt sbtVersion
 
 # Define working directory
 WORKDIR /root
